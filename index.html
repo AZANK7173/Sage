@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-br">
+    <head>
+    <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="google-signin-client_id" content="396372539171-8lc8uulb1hmkjbnh90k889vnmpaf71jj.apps.googleusercontent.com">
+
+
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+        <title>SAGE</title>
+
+        <script type="text/javascript">
+
+            const SPREADSHEAT_ID = '1gcYI826jGG-C5fFl9iq1LBvpnGVTxCuk17LkRd-YYQg';
+            const CLIENT_ID = '396372539171-8lc8uulb1hmkjbnh90k889vnmpaf71jj';
+            const API_KEY = 'AIzaSyAa-0Lte7WGkqpj9H_1djW_s9zr3wkrbrc';
+            const RANGE = 'RECEIVE';
+            const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+            const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+            let tokenClient;
+            let gapiInited = false;
+            let gisInited = false;
+
+            function gapiLoaded() {
+                gapi.load('client', intializeGapiClient);
+            }
+
+            async function intializeGapiClient() {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: [DISCOVERY_DOC],
+                });
+                gapiInited = true;
+                if (gapiInited && gisInited){
+                    loadUser();
+                };
+            }
+
+            function loadUser(){
+                tokenClient.callback = async (resp) => {
+                    if (resp.error !== undefined) {
+                        throw (resp);
+                    }
+                    await fetchdata();
+                };
+
+                if (gapi.client.getToken() === null) {
+                    // Prompt the user to select a Google Account and ask for consent to share their data
+                    // when establishing a new session.
+                    tokenClient.requestAccessToken({prompt: 'consent'});
+                } 
+                else {
+                    // Skip display of account chooser and consent dialog for an existing session.
+                    tokenClient.requestAccessToken({prompt: ''});
+                }
+            }
+
+            function gisLoaded() {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: '', // defined later
+                });
+                gisInited = true;
+                if (gapiInited && gisInited){
+                    loadUser();
+                };
+            }
+
+            function update_received_display(result){
+                var table = document.getElementById("received");
+                var new_row;
+                var new_cell;
+                for(let i = 1; i < result.values.length; i++){
+                    new_row = table.insertRow();
+                    new_cell = new_row.insertCell();
+                    new_cell.innerHTML = i;
+                    for(let j = 0; j < result.values[0].length; j++){
+                        new_cell = new_row.insertCell();
+                        new_cell.innerHTML = result.values[i][j];
+                    }
+                }
+            }
+
+            function update_sent_display(result){
+                var table = document.getElementById("sent");
+                var new_row;
+                var new_cell ;
+                for(let i = 1; i < result.values.length; i++){
+                    new_row = table.insertRow();
+                    new_cell = new_row.insertCell();
+                    new_cell.innerHTML = i;
+                    for(let j = 0; j < result.values[0].length; j++){
+                        new_cell = new_row.insertCell();
+                        new_cell.innerHTML = result.values[i][j];
+                    }
+                }
+            }
+            
+            function fetchdata(){
+                var request =  gapi.client.sheets.spreadsheets.values.get({spreadsheetId: SPREADSHEAT_ID,
+                                                                           range: "RECEIVE",
+                                                                           majorDimension: "ROWS"});
+                
+                request.then((response) => {var result = response.result;
+                                            update_received_display(result);
+                                            });
+
+                var request =  gapi.client.sheets.spreadsheets.values.get({spreadsheetId: SPREADSHEAT_ID,
+                                                                           range: "SEND",
+                                                                           majorDimension: "ROWS"});
+                
+                request.then((response) => {var result = response.result;
+                                            update_sent_display(result);
+                                            });
+            }
+        </script>
+        <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+        <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    </head>
+    <body class="alt-color">
+        <div class="px-4 py-5 my-5 text-center">
+            <!-- <img class="d-block mx-auto mb-4" src="/docs/5.2/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+            <h1 class="display-5 fw-bold">Sage</h1>
+            <div class="col-lg-6 mx-auto">
+              <p class="lead mb-4">Dashboard de informaçãoes da sua caixa de remédios moderninha</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Novo Alarme</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">Deletar Alarme</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-lg-6">
+                    <h1>Alarmes Configurados</h1>
+                    <table class="table" id='sent' >
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Quantidade 1</th>
+                            <th scope="col">Quantidade 2</th>
+                          </tr>
+                        </thead>
+                        <tbody id="received-body">
+                          
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-6">
+                    <h1>Mensagens Recebidas</h1>
+                    <table class="table" id="received">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Mensagem</th>
+                            <th scope="col">Horário</th>
+                          </tr>
+                        </thead>
+                        <tbody id="received-body">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
