@@ -16,6 +16,8 @@ The repository files are:
 * `sketch.ino`: RTOS application code for the ESP32
 * `index.html`: Principle of an application that captures data coming from the embedded system and displays it (not completed)
 
+- [Link to the funny video we made about this project](https://www.tiktok.com/@hassan.vilela/video/7115125238131690757?is_copy_url=1&is_from_webapp=v1)
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Sage -  Disposer de remédios IoT 
@@ -36,3 +38,5 @@ Os arquivos do repositório compõe:
 * `global.h`: Definição de variáveis globais e pinos
 * `sketch.ino`: Aplicação de RTOS do sistema
 * `index.html`: Princípio de uma aplicação que captura os dados vindos do sistema embarcado (não concluído)
+
+-[Link para o vídeo do resultado final (não profissional)](https://www.tiktok.com/@hassan.vilela/video/7115125238131690757?is_copy_url=1&is_from_webapp=v1)
